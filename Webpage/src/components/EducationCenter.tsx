@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { BookOpen, Play, Clock, TrendingUp, Shield, Calculator, ChevronRight } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 export const EducationCenter: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('basics');
@@ -318,17 +320,42 @@ Start planning early - compound growth over decades makes the biggest difference
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-8 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Education Center</h1>
-          <p className="text-slate-600">Build your financial knowledge with our comprehensive guides</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-0 px-0">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-blue-600 to-green-500 py-16 px-4 mb-8">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex-1">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 drop-shadow-lg">Education Center</h1>
+            <p className="text-lg md:text-xl text-blue-100 mb-6 max-w-2xl">
+              Unlock your financial confidence! Explore easy-to-understand guides, practical tips, and expert insights to help you master superannuation, investing, and retirement planning. Whether you’re just starting or looking to optimize your strategy, our resources are here to empower your financial journey.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <span className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-full text-sm font-medium"><TrendingUp className="w-4 h-4 mr-2" /> Grow Your Wealth</span>
+              <span className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-full text-sm font-medium"><Shield className="w-4 h-4 mr-2" /> Manage Risk</span>
+              <span className="inline-flex items-center px-4 py-2 bg-white/20 text-white rounded-full text-sm font-medium"><Calculator className="w-4 h-4 mr-2" /> Plan Retirement</span>
+            </div>
+          </div>
+          <div className="flex-1 flex justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 border border-slate-200 max-w-xs w-full flex flex-col items-center">
+              <BookOpen className="w-12 h-12 text-blue-600 mb-4" />
+              <h2 className="font-bold text-slate-900 text-lg mb-2">Featured Resource</h2>
+              <p className="text-slate-600 text-sm mb-4 text-center">"What is Superannuation?"<br/>Start with the basics and build your knowledge step by step.</p>
+              <button
+                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-green-700 transition-all duration-200"
+                onClick={() => setSelectedCategory('basics')}
+              >
+                Read Now
+              </button>
+            </div>
+          </div>
         </div>
+      </section>
 
+      <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Categories */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-24">
               <h2 className="text-lg font-bold text-slate-900 mb-4">Topics</h2>
               <div className="space-y-2">
                 {categories.map((category) => {
@@ -339,7 +366,7 @@ Start planning early - compound growth over decades makes the biggest difference
                       onClick={() => setSelectedCategory(category.id)}
                       className={`w-full flex items-center space-x-3 p-3 rounded-lg text-left transition-all duration-200 ${
                         selectedCategory === category.id
-                          ? 'bg-blue-100 text-blue-700'
+                          ? 'bg-blue-100 text-blue-700 font-semibold shadow'
                           : 'text-slate-700 hover:bg-slate-50'
                       }`}
                     >
@@ -354,34 +381,42 @@ Start planning early - compound growth over decades makes the biggest difference
 
           {/* Content */}
           <div className="lg:col-span-3">
-            <div className="space-y-6">
+            <div className="space-y-8">
               {content[selectedCategory as keyof typeof content].map((item, index) => (
-                <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
-                  <div className="p-6 border-b border-slate-200">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-xl font-bold text-slate-900 mb-2">{item.title}</h3>
-                        <p className="text-slate-600 mb-4">{item.description}</p>
-                        <div className="flex items-center space-x-4 text-sm text-slate-500">
-                          <div className="flex items-center space-x-1">
-                            <Clock className="w-4 h-4" />
-                            <span>{item.duration}</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            {item.type === 'video' ? <Play className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
-                            <span className="capitalize">{item.type}</span>
-                          </div>
+                <div key={index} className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 hover:shadow-2xl transition-shadow duration-200">
+                  <div className="p-8 border-b border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-900 mb-2">{item.title}</h3>
+                      <p className="text-slate-600 mb-4 text-base">{item.description}</p>
+                      <div className="flex items-center space-x-4 text-sm text-slate-500">
+                        <div className="flex items-center space-x-1">
+                          <Clock className="w-4 h-4" />
+                          <span>{item.duration}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          {item.type === 'video' ? <Play className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                          <span className="capitalize">{item.type}</span>
                         </div>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400" />
                     </div>
+                    <ChevronRight className="w-6 h-6 text-slate-300 self-end md:self-auto" />
                   </div>
-                  
-                  <div className="p-6">
+                  <div className="p-8 bg-slate-50">
                     <div className="prose prose-slate max-w-none">
-                      <div className="whitespace-pre-line text-slate-700 leading-relaxed">
-                        {item.content}
-                      </div>
+                      <ReactMarkdown
+                        children={item.content}
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          ul: ({node, ...props}) => <ul className="list-disc pl-6 mb-4" {...props} />,
+                          ol: ({node, ...props}) => <ol className="list-decimal pl-6 mb-4" {...props} />,
+                          li: ({node, ...props}) => <li className="mb-1" {...props} />,
+                          strong: ({node, ...props}) => <strong className="text-blue-700" {...props} />,
+                          h2: ({node, ...props}) => <h2 className="text-xl font-bold mt-6 mb-2 text-slate-900" {...props} />,
+                          h3: ({node, ...props}) => <h3 className="text-lg font-semibold mt-4 mb-2 text-slate-800" {...props} />,
+                          p: ({node, ...props}) => <p className="mb-2" {...props} />,
+                          code: ({node, ...props}) => <code className="bg-slate-100 px-1 rounded text-pink-600" {...props} />,
+                        }}
+                      />
                     </div>
                   </div>
                 </div>
