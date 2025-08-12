@@ -9,7 +9,7 @@
 +        description: 'Advanced techniques to minimize tax and maximize returns',
 +        duration: '12 min read',
 +        type: 'article',
-+        content: `Advanced tax strategies can significantly boost your retirement savings:
++        content: \`Advanced tax strategies can significantly boost your retirement savings:
 +
 +**Salary Sacrifice Strategies:**
 +- Maximize concessional contributions up to $27,500 cap
