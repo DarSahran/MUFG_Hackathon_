@@ -17,18 +17,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSwitchToSignup, 
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSuccess(false)
 
-    const { error } = await signIn(formData.email, formData.password)
-    
+    const { data, error } = await signIn(formData.email, formData.password)
     if (error) {
-      setError(error.message)
+      if (error.message.includes('Invalid login credentials')) {
+        setError('Incorrect email or password.');
+      } else if (error.message.includes('Email not confirmed')) {
+        setError('Please confirm your email before logging in.');
+      } else {
+        setError(error.message)
+      }
+    } else {
+      setSuccess(true)
+      // Optionally, redirect or reload here
+      window.location.reload();
     }
-    
     setLoading(false)
   }
 
@@ -72,6 +82,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onBack, onSwitchToSignup, 
             {error && (
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-red-700 text-sm">{error}</p>
+              </div>
+            )}
+            {success && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-green-700 text-sm">Login successful! Redirecting...</p>
               </div>
             )}
 

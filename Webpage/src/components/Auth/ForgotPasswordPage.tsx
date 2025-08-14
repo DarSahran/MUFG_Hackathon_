@@ -20,13 +20,17 @@ export const ForgotPasswordPage: React.FC<ForgotPasswordPageProps> = ({ onBack, 
     setError(null)
 
     const { error } = await resetPassword(email)
-    
     if (error) {
-      setError(error.message)
+      if (error.message.includes('User not found')) {
+        setError('No account found with this email.');
+      } else if (error.message.includes('not allowed')) {
+        setError('Password reset is not allowed for this account.');
+      } else {
+        setError(error.message)
+      }
     } else {
       setSuccess(true)
     }
-    
     setLoading(false)
   }
 
