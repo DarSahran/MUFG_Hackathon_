@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { ChatInterface } from './components/ChatInterface';
@@ -6,6 +7,12 @@ import { Dashboard } from './components/Dashboard';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { EducationCenter } from './components/EducationCenter';
 import { LandingPage } from './components/LandingPage';
+import { LoginPage } from './components/Auth/LoginPage';
+import { SignupPage } from './components/Auth/SignupPage';
+import { ForgotPasswordPage } from './components/Auth/ForgotPasswordPage';
+
+import { useAuth } from './hooks/useAuth';
+import { useUserProfile } from './hooks/useUserProfile';
 
 export type UserProfile = {
   name: string;
@@ -19,27 +26,86 @@ export type UserProfile = {
 };
 
 
-type View = 'landing' | 'onboarding' | 'dashboard' | 'chat' | 'education';
+
+type View = 'landing' | 'onboarding' | 'dashboard' | 'chat' | 'education' | 'login' | 'signup' | 'forgot';
+
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const { profile, loading: profileLoading, createProfile } = useUserProfile();
 
-  const handleGetStarted = () => {
-    setCurrentView('onboarding');
-  };
+  // Auth navigation handlers
+  const handleSwitchToLogin = () => setCurrentView('login');
+  const handleSwitchToSignup = () => setCurrentView('signup');
+  const handleSwitchToForgot = () => setCurrentView('forgot');
+  const handleBackToLanding = () => setCurrentView('landing');
 
-  const handleOnboardingComplete = (profile: UserProfile) => {
-    setUserProfile(profile);
+  // Onboarding complete handler
+  const handleOnboardingComplete = async (profileData: any) => {
+    console.log('Submitting onboarding profileData:', profileData);
+    // Remove 'completed' if present
+    if ('completed' in profileData) {
+      delete profileData.completed;
+    }
+    const result = await createProfile(profileData);
+    if (result && result.error) {
+      console.error('Profile creation error:', result.error);
+      alert('Failed to complete onboarding: ' + result.error);
+      return;
+    }
+    console.log('Profile creation result:', result);
     setCurrentView('dashboard');
   };
 
+  // If loading auth/profile, show loading
+  if (authLoading || profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in: show landing or auth pages
+  if (!user) {
+    switch (currentView) {
+      case 'signup':
+        return <SignupPage onBack={handleBackToLanding} onSwitchToLogin={handleSwitchToLogin} />;
+      case 'login':
+        return <LoginPage onBack={handleBackToLanding} onSwitchToSignup={handleSwitchToSignup} onForgotPassword={handleSwitchToForgot} />;
+      case 'forgot':
+        return <ForgotPasswordPage onBack={handleSwitchToLogin} onSwitchToLogin={handleSwitchToLogin} />;
+      default:
+        return <LandingPage onGetStarted={handleSwitchToSignup} />;
+    }
+  }
+
+  // Logged in but no profile: show onboarding
+  if (!profile) {
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
+  }
+
+
+  // Map Supabase profile to app UserProfile type
+  const mapProfile = (p: any): UserProfile => ({
+    name: p.name,
+    age: p.age,
+    retirementAge: p.retirement_age,
+    currentSuper: p.current_super,
+    monthlyContribution: p.monthly_contribution,
+    riskTolerance: p.risk_tolerance,
+    financialGoals: p.financial_goals || [],
+    completed: true,
+  });
+
+  const userProfile = mapProfile(profile);
+
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'landing':
-        return <LandingPage onGetStarted={handleGetStarted} />;
-      case 'onboarding':
-        return <OnboardingFlow onComplete={handleOnboardingComplete} />;
       case 'dashboard':
         return <Dashboard userProfile={userProfile} />;
       case 'chat':
@@ -47,20 +113,18 @@ function App() {
       case 'education':
         return <EducationCenter />;
       default:
-        return <LandingPage onGetStarted={handleGetStarted} />;
+        return <Dashboard userProfile={userProfile} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {currentView !== 'landing' && (
-        <Header 
-          currentView={currentView as Exclude<View, 'landing'>} 
-          setCurrentView={setCurrentView as any}
-          userProfile={userProfile}
-        />
-      )}
-      <main className={currentView !== 'landing' ? 'pt-16' : ''}>
+      <Header 
+        currentView={currentView as Exclude<View, 'landing' | 'login' | 'signup' | 'forgot'>} 
+        setCurrentView={setCurrentView as any}
+        userProfile={userProfile}
+      />
+      <main className="pt-16">
         {renderCurrentView()}
       </main>
     </div>

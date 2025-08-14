@@ -48,11 +48,12 @@ export const SignupPage: React.FC<SignupPageProps> = ({ onBack, onSwitchToLogin 
 
     setLoading(true)
 
-    const { error } = await signUp(formData.email, formData.password, {
+    const { data, error } = await signUp(formData.email, formData.password, {
       first_name: formData.firstName,
       last_name: formData.lastName,
       full_name: `${formData.firstName} ${formData.lastName}`,
     })
+    console.log('Supabase signup response:', { data, error })
 
     if (error) {
       setError(error.message)
